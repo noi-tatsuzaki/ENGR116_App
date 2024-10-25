@@ -1,8 +1,9 @@
 //General
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View, Text, Button, Dimensions, PanResponder, SafeAreaView, StatusBar, TouchableOpacity, TextInput, FlatList } from 'react-native';
+import { IconButton, MD3Colors } from 'react-native-paper';
 //Map
-import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
+import MapView, { PROVIDER_GOOGLE, Marker, Region } from 'react-native-maps';
 import { NavigationContainer } from '@react-navigation/native';
 import 'react-native-gesture-handler';
 import { PanGestureHandler } from 'react-native-gesture-handler';
@@ -189,17 +190,25 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 15,
   },
+  ToStevens: {
+    position: 'absolute',
+    backgroundColor: "#3b5a80",
+    height: 50,
+    width: 50,
+    borderRadius: 200,
+    bottom: 25,
+    right: 25,
+  },
+  schoolIcon: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    bottom: 4.5,
+    right: 4.5,
+  },
 });
 
 //const Tab = createMaterialTopTabNavigator();
 const Tab = createBottomTabNavigator();
-
-const INITIAL_REGION = {
-  latitude: 37.33,
-  longitude: -122,
-  latitudeDelta: 2,
-  longitudeDelta: 2
-}
 
 //Calculator View
 const FirstRoute = () => {
@@ -441,8 +450,8 @@ const SecondRoute = () => {
   const [randomLocation, setRandomLocation] = useState({
     latitude: 10,
     longitude: 10,
-    latitudeDelta: 0.001,
-    longitudeDelta: 0.001,
+    latitudeDelta: 2,
+    longitudeDelta: 2,
   });
 
   useEffect(() => {
@@ -452,19 +461,46 @@ const SecondRoute = () => {
   const generateRandomLocation = () => {
     const latitude = Math.random() * (48.8584 - 40.7128) + 40.7128; // Range: New York to Paris
     const longitude = Math.random() * (-74.0060 - 2.3522) + 2.3522; // Range: New York to Paris
-    const latitudeDelta = 0.0421;
-    const longitudeDelta = 0.0421;
+    const latitudeDelta = 2;
+    const longitudeDelta = 2;
     setRandomLocation({ latitude, longitude, latitudeDelta, longitudeDelta });
   };
-  
+
+  const mapRef = useRef<MapView>(null);
+
+  const navigateToLocation = (latitude: number, longitude: number) => {
+    const newRegion: Region = {
+      latitude,
+      longitude,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01,
+    };
+    if (mapRef.current) {
+      mapRef.current.animateToRegion(newRegion, 1000);
+    }
+  };
+
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <MapView style={StyleSheet.absoluteFill} 
-        provider = {PROVIDER_GOOGLE} 
-        initialRegion={INITIAL_REGION}
-        showsUserLocation = {true}
+      <MapView
+        ref={mapRef}
+        style={StyleSheet.absoluteFill}
+        provider={PROVIDER_GOOGLE}
+        region={randomLocation}
+        showsUserLocation={true}
         showsMyLocationButton
       />
+      <TouchableOpacity
+        style={styles.ToStevens}
+        onPress={() => navigateToLocation(40.7444, -74.0252)}
+      >
+        <IconButton
+          icon="school"
+          iconColor="white"
+          size={30}
+          style={styles.schoolIcon}
+        />
+      </TouchableOpacity>
     </View>
   );
 };
