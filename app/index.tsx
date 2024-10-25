@@ -1,22 +1,14 @@
 //General
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, View, Text, Button, Dimensions, PanResponder, SafeAreaView, StatusBar, TouchableOpacity, TextInput, FlatList } from 'react-native';
+import { StyleSheet, View, Text, Button, Dimensions, PanResponder, SafeAreaView, StatusBar, TouchableOpacity, TextInput, FlatList, PressableAndroidRippleConfig, StyleProp, TextStyle, ViewStyle } from 'react-native';
 import { IconButton, MD3Colors } from 'react-native-paper';
 //Map
 import MapView, { PROVIDER_GOOGLE, Marker, Region } from 'react-native-maps';
-import { NavigationContainer } from '@react-navigation/native';
 import 'react-native-gesture-handler';
-import { PanGestureHandler } from 'react-native-gesture-handler';
-import Animated, { useAnimatedGestureHandler, useSharedValue } from 'react-native-reanimated';
-//Calculator
-
-//Swiper
-import Swiper from 'react-native-swiper';
 //Bottom Bar
 import { BottomTabBar, createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { TabView, SceneMap } from 'react-native-tab-view';
-import { Stack } from 'expo-router';
-import { Double } from 'react-native/Libraries/Types/CodegenTypes';
+import { TabView, SceneMap, TabBar, NavigationState, Route, SceneRendererProps, TabBarIndicatorProps, TabBarItemProps } from 'react-native-tab-view';
+import { Scene, Event } from 'react-native-tab-view/lib/typescript/src/types';
 //Todo List
 
 const windowWidth = Dimensions.get("window").width;
@@ -207,7 +199,6 @@ const styles = StyleSheet.create({
   },
 });
 
-//const Tab = createMaterialTopTabNavigator();
 const Tab = createBottomTabNavigator();
 
 //Calculator View
@@ -598,282 +589,22 @@ const App = () => {
     { key: 'third', title: 'Todo' }
   ]);
 
-  return (
-    <TabView
-      navigationState = {{ index, routes }}
-      renderScene = { renderScene }
-      onIndexChange = { setIndex }
-      swipeEnabled = {true}
+  const renderTabBar = (props: React.JSX.IntrinsicAttributes & SceneRendererProps & { navigationState: NavigationState<Route>; scrollEnabled?: boolean; bounces?: boolean; activeColor?: string; inactiveColor?: string; pressColor?: string; pressOpacity?: number; getLabelText?: ((scene: Scene<Route>) => string | undefined) | undefined; getAccessible?: ((scene: Scene<Route>) => boolean | undefined) | undefined; getAccessibilityLabel?: ((scene: Scene<Route>) => string | undefined) | undefined; getTestID?: ((scene: Scene<Route>) => string | undefined) | undefined; renderLabel?: ((scene: Scene<Route> & { focused: boolean; color: string; }) => React.ReactNode) | undefined; renderIcon?: ((scene: Scene<Route> & { focused: boolean; color: string; }) => React.ReactNode) | undefined; renderBadge?: ((scene: Scene<Route>) => React.ReactNode) | undefined; renderIndicator?: ((props: TabBarIndicatorProps<Route>) => React.ReactNode) | undefined; renderTabBarItem?: ((props: TabBarItemProps<Route> & { key: string; }) => React.ReactElement) | undefined; onTabPress?: ((scene: Scene<Route> & Event) => void) | undefined; onTabLongPress?: ((scene: Scene<Route>) => void) | undefined; tabStyle?: StyleProp<ViewStyle>; indicatorStyle?: StyleProp<ViewStyle>; indicatorContainerStyle?: StyleProp<ViewStyle>; labelStyle?: StyleProp<TextStyle>; contentContainerStyle?: StyleProp<ViewStyle>; style?: StyleProp<ViewStyle>; gap?: number; testID?: string; android_ripple?: PressableAndroidRippleConfig; }) => (
+    <TabBar
+      {...props}
+      style={{ backgroundColor: '#293241' }}
+      indicatorStyle={{ backgroundColor: '#ee6c4d' }}
     />
   );
-}
 
-const SwiperComponent = () => {
   return (
-    <View style = {styles.container}>
-      <Swiper loop = {false} showsPagination = {false} horizontal = {true}>
-      </Swiper>
-    </View>
-  );
-};
-
-function Calculator () {
-  const [answerValue, setAnswerValue] = useState(0);
-  const [readyToReplace, setReadyToReplace] = useState(true);
-  const [memoryValue, setMemoryValue] = useState("");
-  const [operatorValue, setOperatorValue] = useState("");
-  const handleNumber = (value: any) => {
-    if (readyToReplace) {
-        return value.toString();
-    } else {
-        return answerValue.toString() + value.toString();
-    }
-  };
-
-const buttonPressed = (value: any) => {
-    if (!isNaN(value)) {
-      const updatedValue = handleNumber(value.toString());
-      setReadyToReplace(false);
-      setAnswerValue(updatedValue);
-    } else if (value === "C") {
-      setAnswerValue(0);
-      setMemoryValue("");
-      setOperatorValue("");
-      setReadyToReplace(true);
-    } else if (value === "x" || value === "/" || value === "+" || value === "-") {
-      if (operatorValue) {
-        calculateEquals();
-        setOperatorValue(value);
-        setReadyToReplace(true);
-      } else {
-        setMemoryValue(answerValue.toString());
-        setOperatorValue(value);
-        setReadyToReplace(true);
-      }
-    } else if (value === "=") {
-      calculateEquals();
-      setMemoryValue("");
-      setOperatorValue("");
-      setReadyToReplace(true);
-    } else if (value === "+/-") {
-      if (answerValue !== 0) {
-        const newValue = answerValue * -1;
-        setAnswerValue(newValue);
-      }
-    } else if (value === "%") {
-      const perValue = answerValue * 0.01;
-      setAnswerValue(perValue);
-    }
-};
-
-const calculateEquals = () => {
-  const previous = parseFloat(memoryValue);
-  const current = parseFloat(answerValue.toString());
-  let result = 0;
-
-  //... (Logic for performing calculations)
-    switch (operatorValue) {
-    case "x":
-      result = previous * current;
-      break;
-    case "/":
-      result = previous / current;
-      break;
-    case "+":
-      result = previous + current;
-      break;
-    case "-":
-      result = previous - current;
-      break;
-    default:
-      return result;
-  }
-
-  setAnswerValue(result);
-  setOperatorValue("");
-  return result;
-};
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.container}>
-        <Text style={styles.textElement}> {answerValue} </Text>
-
-        <StatusBar barStyle="light-content" backgroundColor="#007bff" />
-        {/* ---------------------------------ROW 1------------------------------------------------------------------------------------------------------ */}
-        <View style={styles.row}>
-          <TouchableOpacity
-            style={styles.toprowbtn}
-            onPress={() => buttonPressed("C")}
-          >
-            <Text style={styles.textTopfirst3btns}> C </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.toprowbtn}
-            onPress={() => buttonPressed("+/-")}
-          >
-            <Text style={styles.textTopfirst3btns}> +/- </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.toprowbtn}
-            onPress={() => buttonPressed("%")}
-          >
-            <Text style={styles.textTopfirst3btns}> % </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.siderowbtn}
-            onPress={() => buttonPressed("/")}
-          >
-            <Text style={styles.textsidebtns}> / </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* ---------------------------------ROW 2------------------------------------------------------------------------------------------------------ */}
-
-        <View style={styles.row}>
-          <TouchableOpacity
-            style={styles.btnc}
-            onPress={() => buttonPressed(7)}
-          >
-            <Text style={styles.textAllbtn}> 7 </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.btnc}
-            onPress={() => buttonPressed(8)}
-          >
-            <Text style={styles.textAllbtn}> 8 </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.btnc}
-            onPress={() => buttonPressed(9)}
-          >
-            <Text style={styles.textAllbtn}> 9 </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.siderowbtn}
-            onPress={() => buttonPressed("x")}
-          >
-            <Text style={styles.textsidebtns}> x </Text>
-          </TouchableOpacity>
-        </View>
-        {/* ---------------------------------ROW 3------------------------------------------------------------------------------------------------------ */}
-        <View style={styles.row}>
-          <TouchableOpacity
-            style={styles.btnc}
-            onPress={() => buttonPressed(4)}
-          >
-            <Text style={styles.textAllbtn}> 4 </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.btnc}
-            onPress={() => buttonPressed(5)}
-          >
-            <Text style={styles.textAllbtn}> 5 </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.btnc}
-            onPress={() => buttonPressed(6)}
-          >
-            <Text style={styles.textAllbtn}> 6 </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.siderowbtn}
-            onPress={() => buttonPressed("-")}
-          >
-            <Text style={styles.textsidebtns}> - </Text>
-          </TouchableOpacity>
-        </View>
-        {/* ---------------------------------ROW 4------------------------------------------------------------------------------------------------------ */}
-        <View style={styles.row}>
-          <TouchableOpacity
-            style={[styles.btnc]}
-            onPress={() => buttonPressed(1)}
-          >
-            <Text style={styles.textAllbtn}> 1 </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.btnc}
-            onPress={() => buttonPressed(2)}
-          >
-            <Text style={styles.textAllbtn}> 2 </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.btnc}
-            onPress={() => buttonPressed(3)}
-          >
-            <Text style={styles.textAllbtn}> 3 </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.siderowbtn}
-            onPress={() => buttonPressed("+")}
-          >
-            <Text style={styles.textsidebtns}> + </Text>
-          </TouchableOpacity>
-        </View>
-        {/* ---------------------------------ROW 5------------------------------------------------------------------------------------------------------ */}
-        <View style={styles.row}>
-          {/* Long Button / 0 Button */}
-          <TouchableOpacity
-            style={styles.longbtn}
-            onPress={() => buttonPressed(0)}
-          >
-            <Text style={styles.textLongbtn}> 0 </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.btnc}
-            onPress={() => buttonPressed(".")}
-          >
-            <Text style={styles.textAllbtn}> . </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.siderowbtn}
-            onPress={() => buttonPressed("=")}
-          >
-            <Text style={styles.textsidebtns}> = </Text>
-          </TouchableOpacity>
-        </View>
-        {/* ---------------------------------ROW END------------------------------------------------------------------------------------------------------ */}
-      </View>
-    </SafeAreaView>
-  );
-}
-
-function Map () {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <MapView
-        style={StyleSheet.absoluteFill} 
-        provider = {PROVIDER_GOOGLE} 
-        //initialRegion={randomLocation}
-        initialRegion={{latitude: 10,
-          longitude: 10,
-          latitudeDelta: 0.001,
-          longitudeDelta: 0.001,}}
-        showsUserLocation = {true}
-        showsMyLocationButton
-      />
-    </View>
-  );
-}
-
-function Todo () {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Home!</Text>
-    </View>
+    <TabView
+      navigationState={{ index, routes }}
+      renderScene={renderScene}
+      onIndexChange={setIndex}
+      swipeEnabled={true}
+      renderTabBar={renderTabBar}
+    />
   );
 }
 
